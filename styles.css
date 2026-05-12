@@ -1,0 +1,640 @@
+/* Mir Family Tree — Havana archival palette: cool ivory, indigo ink,
+   terracotta + faded turquoise as the family-line accents, brass for lineage. */
+:root{
+  --paper:        oklch(0.965 0.008 230);
+  --paper-2:      oklch(0.935 0.012 220);
+  --paper-edge:   oklch(0.86 0.018 215);
+  --ink:          oklch(0.22 0.045 255);
+  --ink-soft:     oklch(0.45 0.035 252);
+  --ink-faint:    oklch(0.64 0.020 248);
+
+  --leaf-deep:    oklch(0.34 0.07 155);   /* royal palm — deep evergreen */
+  --leaf:         oklch(0.50 0.09 150);
+  --leaf-light:   oklch(0.78 0.06 145);
+
+  --bark:         oklch(0.34 0.07 215);   /* parent-line ink: deep teal, not brown */
+  --bark-light:   oklch(0.58 0.06 215);
+
+  --guava:        oklch(0.68 0.13 30);    /* female accent — terracotta, not pink */
+  --guava-deep:   oklch(0.44 0.16 28);
+  --sky:          oklch(0.68 0.085 215);  /* male accent — faded Havana turquoise */
+  --sky-deep:     oklch(0.40 0.10 215);
+
+  --ochre:        oklch(0.68 0.14 78);    /* lineage highlight — brass */
+  --gold:         oklch(0.80 0.12 88);
+
+  --shadow:       0 1px 0 oklch(0.85 0.02 80), 0 8px 24px -12px oklch(0.30 0.05 60 / .25);
+  --card-radius:  10px;
+
+  /* Layout cell sizes — overridden by tweaks */
+  --col-w:        128px;
+  --row-h:        148px;
+  --card-w:       108px;
+  --card-pad:     12px 12px 10px;
+
+  --font-display: "Cormorant Garamond", "Cormorant", "EB Garamond", Georgia, serif;
+  --font-body:    "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-hand:    "Caveat", "Brush Script MT", cursive;
+}
+
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; background:var(--paper); color:var(--ink); font-family:var(--font-body); -webkit-font-smoothing:antialiased; overflow:hidden; height:100%; }
+
+#root{ height:100vh; }
+
+/* paper texture — subtle */
+.paper-bg{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(1200px 700px at 20% 10%, oklch(0.97 0.018 95) 0%, transparent 60%),
+    radial-gradient(900px 600px at 90% 90%, oklch(0.94 0.022 80) 0%, transparent 60%),
+    var(--paper);
+}
+.paper-bg::after{
+  content:""; position:absolute; inset:0;
+  background-image:
+    radial-gradient(oklch(0.85 0.03 80 / .25) 1px, transparent 1.4px),
+    radial-gradient(oklch(0.40 0.04 70 / .04) 1px, transparent 1.5px);
+  background-size: 3px 3px, 7px 7px;
+  background-position: 0 0, 1px 2px;
+  mix-blend-mode: multiply;
+  opacity:.6;
+}
+
+/* ── Top chrome ─────────────────────────────────────────────── */
+.topbar{
+  position:fixed; top:0; left:0; right:0; z-index:50;
+  display:flex; align-items:center; gap:16px;
+  padding:14px 22px 12px;
+  background:
+    radial-gradient(ellipse 360px 110px at 70px 30px, oklch(0.96 0.028 18 / .6), transparent 70%),
+    radial-gradient(ellipse 340px 100px at calc(100% - 80px) 30px, oklch(0.95 0.04 145 / .45), transparent 70%),
+    linear-gradient(to bottom, var(--paper) 60%, transparent);
+  pointer-events:none;
+}
+.topbar > *{ pointer-events:auto; }
+.brand{
+  display:flex; align-items:center; gap:12px;
+}
+.brand .mark{
+  width:38px; height:38px; flex:0 0 38px;
+  position:relative;
+}
+.brand h1{
+  font-family:var(--font-display);
+  font-weight:500; font-size:24px; letter-spacing:0.01em;
+  margin:0; line-height:1; color:var(--ink);
+}
+.brand h1 em{
+  font-style:italic; font-weight:400; color:var(--leaf-deep);
+}
+.brand .sub{
+  font-size:11px; letter-spacing:0.22em; text-transform:uppercase;
+  color:var(--ink-faint); margin-top:4px;
+}
+
+.toolbar{
+  margin-left:auto;
+  display:flex; align-items:center; gap:8px;
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:999px;
+  padding:5px;
+  box-shadow:var(--shadow);
+}
+.tb-btn{
+  appearance:none; border:0; background:transparent;
+  font:inherit; color:var(--ink-soft); cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:7px 13px; border-radius:999px;
+  font-size:13px; font-weight:500;
+  transition:background .15s, color .15s;
+}
+.tb-btn:hover{ background:oklch(0.92 0.02 80); color:var(--ink); }
+.tb-btn.active{ background:var(--leaf-deep); color:var(--paper); }
+.tb-btn.active:hover{ background:var(--leaf-deep); color:var(--paper); }
+.tb-btn svg{ width:14px; height:14px; }
+
+.search-wrap{
+  position:relative;
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:999px;
+  padding:6px 14px 6px 36px;
+  box-shadow:var(--shadow);
+  display:flex; align-items:center;
+  min-width:240px;
+}
+.search-wrap svg{ position:absolute; left:13px; width:14px; height:14px; color:var(--ink-faint); }
+.search-wrap input{
+  border:0; outline:0; background:transparent; font:inherit; font-size:13px;
+  width:100%; color:var(--ink);
+}
+.search-results{
+  position:absolute; left:0; right:0; top:calc(100% + 6px);
+  background:var(--paper); border:1px solid var(--paper-edge); border-radius:12px;
+  box-shadow:var(--shadow);
+  max-height:280px; overflow-y:auto;
+  padding:4px;
+}
+.search-result{
+  display:flex; align-items:center; gap:10px;
+  padding:7px 10px; border-radius:8px; cursor:pointer;
+  font-size:13px;
+}
+.search-result:hover{ background:oklch(0.94 0.02 80); }
+.search-result .dot{ width:8px; height:8px; border-radius:99px; flex:0 0 8px; }
+.search-result .yr{ margin-left:auto; color:var(--ink-faint); font-size:11px; font-variant-numeric:tabular-nums; }
+
+/* ── Canvas ─────────────────────────────────────────────────── */
+.stage{ position:absolute; inset:0; overflow:hidden; cursor:grab; }
+.stage.grabbing{ cursor:grabbing; }
+.world{ position:absolute; transform-origin:0 0; will-change:transform; }
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.person{
+  position:absolute;
+  width:var(--card-w);
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:var(--card-radius);
+  padding:var(--card-pad);
+  box-shadow:var(--shadow);
+  text-align:center;
+  cursor:pointer;
+  transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+  user-select:none;
+}
+.person.m{ border-color: oklch(0.84 0.045 235); }
+.person.f{ border-color: oklch(0.84 0.055 18); }
+.person{ --gen-scale: 1; transform: scale(var(--gen-scale)); transform-origin: center center; }
+.person.gen-1{ --gen-scale: 1.08; }
+.person.gen-2{ --gen-scale: 1.05; }
+.person.gen-3{ --gen-scale: 1.03; }
+.person.gen-4{ --gen-scale: 1.00; }
+.person.gen-5{ --gen-scale: 0.97; }
+.person.gen-6{ --gen-scale: 0.95; }
+.person.gen-7{ --gen-scale: 0.93; }
+.person:hover{ transform: scale(var(--gen-scale)) translateY(-2px); box-shadow:0 1px 0 oklch(0.85 0.02 80), 0 12px 30px -10px oklch(0.30 0.05 60 / .35); }
+.person.dim{ opacity:.22; filter:saturate(0.5); }
+.person.lineage{ box-shadow:0 0 0 2px var(--ochre), 0 12px 30px -10px oklch(0.30 0.05 60 / .35); }
+.person.focus{ box-shadow:0 0 0 2px var(--leaf-deep), 0 12px 30px -10px oklch(0.30 0.05 60 / .35); }
+.person.alive-now{ outline:1px dashed oklch(0.55 0.08 145 / .35); outline-offset:3px; }
+
+/* Married-in spouses (no parents in tree) — dashed border + lighter card so blood relatives stand out */
+.person.inlaw{
+  border-style:dashed;
+  background:oklch(0.965 0.005 230);
+  box-shadow:none;
+}
+.person.inlaw .name,
+.person.inlaw .sur{ font-weight:400; }
+.person.inlaw .portrait{ opacity:.82; }
+.person.inlaw:hover{ box-shadow:0 1px 0 oklch(0.85 0.02 80), 0 10px 24px -10px oklch(0.30 0.05 60 / .25); }
+.person.inlaw.focus,
+.person.inlaw.lineage{ border-style:solid; }
+
+.person .portrait{
+  width:46px; height:46px; margin:0 auto 8px;
+  border-radius:99px;
+  background:oklch(0.94 0.018 90);
+  border:1px solid var(--paper-edge);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.person.m .portrait{ background:oklch(0.95 0.025 235); border-color:oklch(0.85 0.04 235); }
+.person.f .portrait{ background:oklch(0.96 0.028 18);  border-color:oklch(0.86 0.05 18);  }
+.person .portrait image-slot{ width:46px; height:46px; display:block; }
+/* Hide the empty drop-zone state on person cards — most relatives won't have photos.
+   Drag-and-drop still works (it's bound to the host element, not the .empty layer). */
+.person .portrait image-slot::part(empty){ display:none; }
+.person .portrait image-slot::part(frame){ background:transparent; border:0; }
+.person .portrait .initials{
+  font-family:var(--font-display);
+  font-size:18px; font-weight:500;
+  color:var(--ink-soft);
+}
+.person .name{
+  font-family:var(--font-display);
+  font-size:15px; line-height:1.12;
+  font-weight:500;
+  color:var(--ink);
+  letter-spacing:0.005em;
+}
+.person .sur{
+  font-family:var(--font-display);
+  font-size:15px; line-height:1.18;
+  font-weight:600;
+  font-style:italic;
+  color:var(--leaf-deep);
+  margin-top:2px;
+}
+.person.f .sur{ color:var(--guava-deep); }
+.person.m .sur{ color:var(--sky-deep); }
+.person .years{
+  font-size:10px; letter-spacing:0.08em;
+  color:var(--ink-faint);
+  margin-top:4px;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Compact density */
+.density-compact{
+  --col-w:104px;
+  --row-h:118px;
+  --card-w:88px;
+  --card-pad:8px 8px 8px;
+}
+.density-compact .person .portrait{ width:34px; height:34px; margin-bottom:5px; }
+.density-compact .person .portrait image-slot{ width:34px; height:34px; }
+.density-compact .person .name{ font-size:13px; }
+.density-compact .person .sur{ font-size:13px; }
+.density-compact .person .years{ font-size:9px; margin-top:2px; }
+
+/* Spacious */
+.density-spacious{
+  --col-w:160px;
+  --row-h:180px;
+  --card-w:138px;
+  --card-pad:14px 14px 12px;
+}
+.density-spacious .person .portrait{ width:58px; height:58px; }
+.density-spacious .person .portrait image-slot{ width:58px; height:58px; }
+.density-spacious .person .name{ font-size:17px; }
+.density-spacious .person .sur{ font-size:16px; }
+
+/* ── Era strip: generation row labels (era + gen number) at left margin ───── */
+.gen-label{
+  position:absolute;
+  left:-150px;
+  display:flex; flex-direction:column; align-items:flex-end; gap:3px;
+  font-family:var(--font-display);
+  color:var(--ink-faint);
+  padding-right:14px;
+  border-right:1px dashed oklch(0.82 0.022 215);
+  width:124px;
+}
+.gen-label .era{
+  font-style:italic;
+  font-size:18px;
+  font-weight:500;
+  color:var(--ink-soft);
+  line-height:1;
+  letter-spacing:.01em;
+}
+.gen-label .num{
+  font-family:var(--font-body);
+  font-weight:600;
+  font-size:9px;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--ink-faint);
+}
+
+/* ── Convergence: where the two lineages meet at Carlos × Clemencia ────── */
+.convergence-glow{
+  position:absolute;
+  width:360px; height:180px;
+  background:radial-gradient(ellipse at center,
+    oklch(0.85 0.13 78 / .32) 0%,
+    oklch(0.88 0.10 80 / .14) 35%,
+    transparent 70%);
+  pointer-events:none;
+  z-index:0;
+  border-radius:50%;
+}
+.convergence-mark{
+  position:absolute;
+  display:flex; flex-direction:column; align-items:center;
+  transform:translateX(-50%);
+  color:var(--ochre);
+  pointer-events:none;
+  z-index:5;
+}
+.convergence-mark .label{
+  margin-top:1px;
+  font-family:var(--font-display);
+  font-style:italic;
+  font-size:11px;
+  letter-spacing:.04em;
+  color:oklch(0.45 0.13 78);
+  white-space:nowrap;
+}
+
+/* ── Connectors ─────────────────────────────────────────────── */
+svg.wires{
+  position:absolute; left:0; top:0;
+  pointer-events:none;
+  overflow:visible;
+}
+svg.wires path{ fill:none; stroke:var(--bark-light); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+svg.wires path.parent{ stroke:var(--bark); stroke-width:2; }
+svg.wires path.union{ stroke:var(--guava-deep); stroke-width:2; stroke-dasharray:0; }
+svg.wires path.lineage{ stroke:var(--ochre); stroke-width:3; }
+svg.wires path.dim{ opacity:.18; }
+
+/* Timeline view dials the wires way back — the bars are the primary content,
+   relationships are secondary and shouldn't compete visually. */
+svg.timeline-wires path{ stroke-width:1; opacity:.32; }
+svg.timeline-wires path.union{ stroke-width:1.2; opacity:.5; }
+svg.timeline-wires path.lineage{ stroke-width:2.5; opacity:1; }
+svg.timeline-wires path.dim{ opacity:.08; }
+
+/* ── Detail drawer ─────────────────────────────────────────── */
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:380px;
+  background:var(--paper);
+  border-left:1px solid var(--paper-edge);
+  box-shadow:-20px 0 40px -20px oklch(0.30 0.05 60 / .25);
+  z-index:60;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.5,.05,.2,1);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.drawer.open{ transform:translateX(0); }
+.drawer .close{
+  position:absolute; right:12px; top:12px;
+  width:30px; height:30px; border-radius:99px; border:0;
+  background:var(--paper-2); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink-soft);
+}
+.drawer .close:hover{ background:oklch(0.90 0.025 80); }
+.drawer .header{
+  padding:36px 28px 18px;
+  background:
+    url("botanical.svg") no-repeat right 14px top 14px / 110px 86px,
+    linear-gradient(180deg, oklch(0.93 0.04 145 / .26), transparent);
+  border-bottom:1px solid var(--paper-edge);
+  position:relative;
+}
+.drawer .pf{
+  width:96px; height:96px; border-radius:99px;
+  background:var(--paper-2); border:1px solid var(--paper-edge);
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.drawer .pf image-slot{ width:96px; height:96px; display:block; }
+.drawer h2{
+  font-family:var(--font-display);
+  font-weight:500; font-size:30px; line-height:1.05;
+  margin:0; letter-spacing:.005em;
+}
+.drawer h2 em{ font-style:italic; font-weight:400; color:var(--leaf-deep); }
+.drawer .meta{
+  margin-top:8px;
+  font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-faint);
+}
+.drawer .body{ padding:20px 28px; overflow-y:auto; flex:1; }
+.drawer h3{
+  font-family:var(--font-body); font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.18em; color:var(--ink-faint);
+  margin:0 0 10px;
+}
+.relation-list{ display:flex; flex-direction:column; gap:6px; margin:0 0 22px; }
+.relation-row{
+  display:flex; align-items:center; gap:10px;
+  padding:7px 10px; border-radius:8px;
+  cursor:pointer;
+  border:1px solid transparent;
+  font-size:13px;
+}
+.relation-row:hover{ border-color:var(--paper-edge); background:var(--paper-2); }
+.relation-row .role{
+  font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-faint); width:70px; flex:0 0 70px;
+}
+.relation-row .nm{ font-family:var(--font-display); font-size:16px; }
+.relation-row .nm em{ font-style:italic; color:var(--leaf-deep); }
+.action-row{
+  display:flex; gap:8px; margin-top:8px;
+}
+.action-btn{
+  flex:1;
+  appearance:none; border:1px solid var(--paper-edge);
+  background:var(--paper-2); cursor:pointer; font:inherit;
+  font-size:12px; font-weight:600; letter-spacing:.04em;
+  padding:8px 10px; border-radius:8px; color:var(--ink-soft);
+}
+.action-btn:hover{ background:oklch(0.93 0.025 80); color:var(--ink); }
+.action-btn.primary{ background:var(--leaf-deep); color:var(--paper); border-color:var(--leaf-deep); }
+.action-btn.primary:hover{ background:oklch(0.28 0.06 150); color:var(--paper); }
+.action-btn.primary.active{ background:var(--ochre); border-color:var(--ochre); color:var(--paper); }
+.action-btn.primary.active:hover{ background:oklch(0.50 0.13 70); }
+
+/* ── Stats card ─────────────────────────────────────────────── */
+.stats{
+  position:fixed; left:22px; bottom:22px; z-index:40;
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  padding:14px 18px;
+  display:flex; gap:22px;
+  font-variant-numeric:tabular-nums;
+}
+.stats .stat .n{
+  font-family:var(--font-display); font-size:22px; font-weight:500;
+  line-height:1; color:var(--ink);
+}
+.stats .stat .l{
+  font-size:10px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin-top:5px;
+}
+.stats .stat .n em{ font-style:italic; color:var(--leaf-deep); }
+
+/* ── Zoom controls ──────────────────────────────────────────── */
+.zoom-ctrl{
+  position:fixed; right:22px; bottom:22px; z-index:40;
+  display:flex; flex-direction:column;
+  background:var(--paper);
+  border:1px solid var(--paper-edge);
+  border-radius:12px; box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.zoom-ctrl button{
+  appearance:none; border:0; background:transparent; cursor:pointer;
+  width:38px; height:36px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ink-soft);
+  border-bottom:1px solid var(--paper-edge);
+}
+.zoom-ctrl button:last-child{ border-bottom:0; }
+.zoom-ctrl button:hover{ background:var(--paper-2); color:var(--ink); }
+.zoom-ctrl .zoom-pct{
+  font-size:10px; letter-spacing:.1em; color:var(--ink-faint);
+  text-align:center; padding:6px 0; border-bottom:1px solid var(--paper-edge);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ── Tooltip ────────────────────────────────────────────────── */
+.tip{
+  position:fixed; z-index:80;
+  background:var(--ink);
+  color:var(--paper);
+  padding:10px 13px;
+  border-radius:8px;
+  font-size:12px;
+  line-height:1.45;
+  pointer-events:none;
+  max-width:240px;
+  box-shadow:0 12px 24px -10px oklch(0.20 0.04 60 / .4);
+}
+.tip .nm{ font-family:var(--font-display); font-size:14px; }
+.tip .nm em{ font-style:italic; color:oklch(0.85 0.07 140); }
+.tip .ln{ opacity:.7; margin-top:3px; font-variant-numeric:tabular-nums; }
+.tip .pl{ opacity:.6; margin-top:1px; font-style:italic; }
+
+/* ── Timeline-specific ─────────────────────────────────────── */
+.timeline-axis{
+  position:absolute;
+  left:-92px;
+  top:0; bottom:0;
+  display:flex; flex-direction:column;
+  align-items:flex-end;
+  font-variant-numeric:tabular-nums;
+  font-size:11px; color:var(--ink-faint);
+}
+.timeline-axis .tick{
+  position:absolute; right:0;
+  display:flex; align-items:center; gap:8px;
+  transform:translateY(-50%);
+}
+.timeline-axis .tick .yr{
+  font-weight:500; letter-spacing:.06em;
+  background:var(--paper); padding:2px 8px;
+  border:1px solid var(--paper-edge); border-radius:99px;
+}
+.timeline-axis .tick .ln{
+  width:14px; height:1px; background:var(--paper-edge);
+}
+.timeline-now-rule{
+  position:absolute; left:0; right:0; height:0;
+  border-top:1px dashed var(--guava-deep);
+  pointer-events:none;
+  z-index:5;
+}
+.timeline-now-rule .lab{
+  position:absolute; right:-2px; top:-22px;
+  font-family:var(--font-hand);
+  font-size:18px; color:var(--guava-deep);
+}
+.timeline-cursor{
+  position:absolute; left:0; right:0; height:0;
+  border-top:1.5px solid var(--ochre);
+  pointer-events:none;
+  z-index:6;
+}
+.timeline-cursor .badge{
+  position:absolute; left:-130px; top:-13px;
+  background:var(--ochre); color:var(--paper);
+  font-weight:600; font-size:11px; letter-spacing:.1em;
+  padding:4px 9px; border-radius:99px;
+  font-variant-numeric:tabular-nums;
+}
+.timeline-cursor .count{
+  position:absolute; right:8px; top:-13px;
+  background:var(--ochre); color:var(--paper);
+  font-weight:600; font-size:11px; letter-spacing:.1em;
+  padding:4px 9px; border-radius:99px;
+}
+
+/* Timeline person — vertical bar spanning lifespan */
+/* Lifespan tracks — narrow vertical bars on the timeline */
+.life{
+  position:absolute;
+  background:oklch(0.97 0.012 90);
+  border:1px solid var(--paper-edge);
+  border-radius:6px;
+  cursor:pointer;
+  transition:opacity .15s, box-shadow .15s, transform .15s;
+}
+.life.m{ background:oklch(0.96 0.018 235); border-color: oklch(0.82 0.06 235); }
+.life.f{ background:oklch(0.97 0.022 18);  border-color: oklch(0.84 0.07 18); }
+.life:hover{ box-shadow:0 0 0 1px var(--ink-soft), 0 8px 18px -6px oklch(0.30 0.05 60 / .4); transform:translateX(-1px); z-index:3; }
+.life.dim{ opacity:.18; }
+.life.lineage{ box-shadow:0 0 0 2px var(--ochre); }
+.life.alive-now{ outline:1px solid oklch(0.60 0.10 145 / .5); outline-offset:1px; }
+.life{ overflow:visible; }
+.life .yr-b,
+.life .yr-d{
+  position:absolute; left:50%; transform:translateX(-50%);
+  font-size:9px; letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+  color:var(--ink-soft);
+  font-weight:500;
+  background:var(--paper);
+  padding:0 3px;
+  border-radius:3px;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.life .yr-b{ top:-8px; }
+.life .yr-d{ bottom:-8px; }
+
+/* Name rides vertically inside the bar — rotated 90deg, anchored to the bar's top */
+.life .rot-label{
+  position:absolute;
+  left:50%;
+  top:14px;
+  transform-origin:left top;
+  transform:rotate(90deg) translateY(-50%);
+  font-family:var(--font-display);
+  font-size:11px;
+  line-height:1;
+  white-space:nowrap;
+  pointer-events:none;
+  color:var(--ink);
+  letter-spacing:.01em;
+}
+.life .rot-label .nm{ font-weight:500; }
+.life .rot-label .sur{ font-weight:600; font-style:italic; color:var(--leaf-deep); }
+.life.m .rot-label .sur{ color:var(--sky-deep); }
+.life.f .rot-label .sur{ color:var(--guava-deep); }
+.life.lineage .rot-label{ color:oklch(0.40 0.13 70); }
+
+/* ── Legend ─────────────────────────────────────────────────── */
+.legend{
+  position:fixed; top:78px; left:22px; z-index:30;
+  background:var(--paper); border:1px solid var(--paper-edge);
+  border-radius:10px; padding:8px 12px;
+  box-shadow:var(--shadow);
+  display:flex; gap:14px; align-items:center;
+  font-size:11px; color:var(--ink-soft);
+}
+.legend .sw{ width:10px; height:10px; border-radius:99px; }
+.legend .item{ display:flex; align-items:center; gap:6px; }
+
+/* Banner that appears when a lineage is highlighted. Centered up top, obviously dismissible. */
+.lineage-banner{
+  position:fixed; top:78px; left:50%; transform:translateX(-50%);
+  z-index:40;
+  display:flex; align-items:center; gap:10px;
+  padding:10px 16px;
+  background:oklch(0.97 0.05 75);
+  border:1px solid var(--ochre);
+  border-radius:99px;
+  box-shadow:0 8px 24px -8px oklch(0.55 0.13 70 / .35);
+  font-family:var(--font-display);
+  font-size:14px; color:var(--ink);
+  cursor:pointer;
+  transition:transform .18s cubic-bezier(.2,.6,.2,1), box-shadow .18s;
+}
+.lineage-banner:hover{ transform:translateX(-50%) translateY(-1px); box-shadow:0 12px 28px -8px oklch(0.55 0.13 70 / .45); }
+.lineage-banner .sw{ width:11px; height:11px; border-radius:99px; }
+.lineage-banner strong{ font-weight:600; font-style:italic; }
+.lineage-banner .clear{
+  margin-left:6px; padding-left:10px;
+  border-left:1px solid oklch(0.85 0.07 75);
+  color:var(--guava-deep); font-weight:500;
+  font-size:13px; letter-spacing:.01em;
+}
+
+/* ── Print-friendly ─────────────────────────────────────────── */
+@media print{
+  .topbar, .toolbar, .zoom-ctrl, .drawer, .stats, .legend, .search-wrap{ display:none !important; }
+  body{ background:var(--paper); }
+  .stage{ overflow:visible; position:static; height:auto; }
+}
