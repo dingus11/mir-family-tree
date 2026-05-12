@@ -618,7 +618,7 @@ function TopBar({ view, setView, query, setQuery, results, onPickResult }){
   return (
     <header className="topbar">
       <div className="brand">
-        <h1>The Mir Family</h1>
+        <h1>Family Tree</h1>
       </div>
 
       <div className="search-wrap">
