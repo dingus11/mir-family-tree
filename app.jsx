@@ -83,11 +83,15 @@ function usePanZoom(stageRef){
     stageRef.current?.classList.add('grabbing');
   };
   const onMouseMove = (e) => {
-    if (!drag.current) return;
-    const dx = e.clientX - drag.current.sx;
-    const dy = e.clientY - drag.current.sy;
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.sx;
+    const dy = e.clientY - d.sy;
     if (Math.abs(dx) + Math.abs(dy) > 4) didDragRef.current = true;
-    setT(p => clamp(drag.current.tx + dx, drag.current.ty + dy, p.k));
+    // Capture d.tx/d.ty in closure NOW — React may defer the setter and by then
+    // onMouseUp could have nulled drag.current, throwing inside the updater.
+    const tx = d.tx, ty = d.ty;
+    setT(p => clamp(tx + dx, ty + dy, p.k));
   };
   const onMouseUp = () => {
     drag.current = null;
@@ -862,4 +866,32 @@ function App(){
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+// Error boundary so an unhandled render error shows a recovery card instead of blanking the page.
+class ErrorBoundary extends React.Component {
+  constructor(p){ super(p); this.state = { err: null }; }
+  static getDerivedStateFromError(err){ return { err }; }
+  componentDidCatch(err, info){ console.error('Render error:', err, info); }
+  reset = () => this.setState({ err: null });
+  render(){
+    if (!this.state.err) return this.props.children;
+    return (
+      <div style={{position:'fixed', inset:0, display:'flex', alignItems:'center', justifyContent:'center', background:'var(--paper)', padding:24}}>
+        <div style={{maxWidth:480, fontFamily:'var(--font-display)', color:'var(--ink)'}}>
+          <h2 style={{margin:'0 0 8px', fontWeight:500}}>Something hiccuped.</h2>
+          <p style={{margin:'0 0 16px', color:'var(--ink-soft)', fontSize:14}}>
+            The tree hit a snag during a pan or click. Your photos and tweaks are saved.
+          </p>
+          <button onClick={this.reset}
+            style={{padding:'8px 16px', borderRadius:99, border:'1px solid var(--paper-edge)',
+                    background:'var(--leaf-deep)', color:'var(--paper)', cursor:'pointer', font:'inherit'}}>
+            Recover
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <ErrorBoundary><App /></ErrorBoundary>
+);
