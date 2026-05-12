@@ -60,9 +60,24 @@ function usePanZoom(stageRef){
   const drag = useRef(null);
   const didDragRef = useRef(false);
 
+  // Clamp pan/zoom so the tree always stays at least partially visible.
+  // Without this, panning off-screen makes the page look blank.
+  const clamp = (x, y, k) => {
+    const stage = stageRef.current;
+    if (!stage) return { x, y, k };
+    const r = stage.getBoundingClientRect();
+    const w = stage.querySelector('.world');
+    const ww = w?.scrollWidth || 0;
+    const wh = w?.scrollHeight || 0;
+    const M = 80;
+    if (ww > 0) x = Math.min(r.width - M, Math.max(-ww * k + M, x));
+    if (wh > 0) y = Math.min(r.height - M, Math.max(-wh * k + M, y));
+    return { x, y, k };
+  };
+
   const onMouseDown = (e) => {
     if (e.button !== 0) return;
-    if (e.target.closest('.person, .life, .drawer, .toolbar, .stats, .zoom-ctrl, .search-wrap, .legend')) return;
+    if (e.target.closest('.person, .life, .drawer, .toolbar, .stats, .zoom-ctrl, .search-wrap, .legend, .lineage-banner, .convergence-mark')) return;
     drag.current = { sx:e.clientX, sy:e.clientY, tx:t.x, ty:t.y };
     didDragRef.current = false;
     stageRef.current?.classList.add('grabbing');
@@ -72,7 +87,7 @@ function usePanZoom(stageRef){
     const dx = e.clientX - drag.current.sx;
     const dy = e.clientY - drag.current.sy;
     if (Math.abs(dx) + Math.abs(dy) > 4) didDragRef.current = true;
-    setT(p => ({ ...p, x: drag.current.tx + dx, y: drag.current.ty + dy }));
+    setT(p => clamp(drag.current.tx + dx, drag.current.ty + dy, p.k));
   };
   const onMouseUp = () => {
     drag.current = null;
@@ -89,7 +104,7 @@ function usePanZoom(stageRef){
       // keep point under cursor stable
       const x = mx - (mx - p.x) * (k / p.k);
       const y = my - (my - p.y) * (k / p.k);
-      return { x, y, k };
+      return clamp(x, y, k);
     });
   };
 
@@ -656,7 +671,7 @@ function TopBar({ view, setView, query, setQuery, results, onPickResult }){
       <div className="toolbar">
         <button className={`tb-btn ${view==='hierarchy' ? 'active':''}`} onClick={()=>setView('hierarchy')}>
           <svg viewBox="0 0 14 14"><rect x="5" y="1" width="4" height="3" fill="none" stroke="currentColor" strokeWidth="1"/><rect x="1" y="9" width="4" height="3" fill="none" stroke="currentColor" strokeWidth="1"/><rect x="9" y="9" width="4" height="3" fill="none" stroke="currentColor" strokeWidth="1"/><path d="M7 4 V 6.5 H 3 V 9 M 7 6.5 H 11 V 9" stroke="currentColor" strokeWidth="1" fill="none"/></svg>
-          Hierarchy
+          Tree
         </button>
         <button className={`tb-btn ${view==='timeline' ? 'active':''}`} onClick={()=>setView('timeline')}>
           <svg viewBox="0 0 14 14"><path d="M2 2 V 12 M 5 4 V 11 M 8 3 V 12 M 11 6 V 11" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round"/></svg>
@@ -856,7 +871,7 @@ function App(){
 
       <TweaksPanel title="Tweaks">
         <TweakSection label="View">
-          <TweakRadio label="Layout" value={t.view} onChange={(v)=>setTweak('view', v)} options={[{value:'hierarchy', label:'Hierarchy'},{value:'timeline', label:'Timeline'}]} />
+          <TweakRadio label="Layout" value={t.view} onChange={(v)=>setTweak('view', v)} options={[{value:'hierarchy', label:'Tree'},{value:'timeline', label:'Timeline'}]} />
           <TweakSlider label="Generation depth" value={t.depth} min={1} max={7} step={1} onChange={(v)=>setTweak('depth', v)} />
           {t.view === 'timeline' && (
             <TweakSlider label="Year cursor" value={t.timelineYear} min={1850} max={2026} step={1} onChange={(v)=>setTweak('timelineYear', v)} />
