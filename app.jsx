@@ -285,24 +285,8 @@ const GEN_ERAS = {
 function HierarchyView({ geo, focusId, onPick, depth, lineageSet, dimOthers, onHover, hovered }){
   const visibleIds = Object.keys(FAMILY.people).filter(id => FAMILY.people[id].gen <= depth);
 
-  // Convergence marker — Carlos Mir × Clemencia Narbona, where the two lineages meet.
-  const cm = geo.pos['carlos_mir'];
-  const cn = geo.pos['clemencia_narbona'];
-  const convergence = (cm && cn && FAMILY.people['carlos_mir'].gen <= depth) ? {
-    cx: (cm.cx + cn.cx) / 2,
-    cy: cm.cy,
-  } : null;
-
   return (
     <>
-      {/* Soft halo behind the convergence couple */}
-      {convergence && (
-        <div className="convergence-glow" style={{
-          left: convergence.cx - 180,
-          top: convergence.cy - 90,
-        }} />
-      )}
-
       <Wires geo={geo} depth={depth} lineageSet={lineageSet} dimOthers={dimOthers} />
 
       {/* Era strip — generation row labels with the era they lived through */}
@@ -324,21 +308,6 @@ function HierarchyView({ geo, focusId, onPick, depth, lineageSet, dimOthers, onH
         />
       ))}
 
-      {/* Convergence flourish on top — small guava-branch motif and label */}
-      {convergence && (
-        <div className="convergence-mark" style={{
-          left: convergence.cx,
-          top: convergence.cy - geo.CARD_H/2 - 26,
-        }}>
-          <svg viewBox="0 0 40 28" width="40" height="28" aria-hidden="true">
-            <path d="M4 22 Q 14 4 36 8" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
-            <path d="M12 16 Q 8 8 18 6" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-            <path d="M22 12 Q 24 4 32 6" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round"/>
-            <circle cx="34" cy="9" r="3" fill="currentColor" opacity="0.5"/>
-          </svg>
-          <span className="label">where the families meet</span>
-        </div>
-      )}
     </>
   );
 }
@@ -645,11 +614,7 @@ function TopBar({ view, setView, query, setQuery, results, onPickResult }){
   return (
     <header className="topbar">
       <div className="brand">
-        <span className="mark"><BrandMark/></span>
-        <div>
-          <h1>The <em>Mir</em> Family</h1>
-          <div className="sub">an heirloom · Cuba · seven generations</div>
-        </div>
+        <h1>The Mir Family</h1>
       </div>
 
       <div className="search-wrap">
